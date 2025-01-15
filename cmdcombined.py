@@ -55,7 +55,7 @@ def analyze_emotion_threaded(img):
     except Exception as e:
         pass
 
-# webcam emotion recognition
+
 def webcam_emotion_recognition():
     haar_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
     feed = cv.VideoCapture(0)
