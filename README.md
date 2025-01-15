@@ -131,6 +131,8 @@ Enter text to analyze: I'm feeling a bit down today.
 Detected Emotion: Sadness
 AI Response: It's okay to feel sad. Take a deep breath and give yourself some time.
 ```
+---
+
 ## **Usage**
 
 ### **UI Version (Web Interface)**
@@ -144,7 +146,7 @@ AI Response: It's okay to feel sad. Take a deep breath and give yourself some ti
 3. Stop Webcam:
 - Click "Stop Webcam" to stop the video feed.
 - The text area will be cleared, and the webcam will stop streaming.
-- 
+  
 ### **CLI Version**
 
 1. Text Input:
