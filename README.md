@@ -1,6 +1,6 @@
 # **Moodify: AI-Powered Emotion Recognition and Response**
 
-Moodify is an AI-powered platform that recognizes emotions from video or text input and generates personalized responses based on the detected emotion. Moodify provides two interfaces: one with a **UI (Web Interface)** for webcam and real-time video interaction and one with a **Command-Line Interface (CLI)** for text-based analysis and emotion recognition.
+Moodify is an AI-powered platform that recognizes emotions from video or text input and generates personalized responses based on the detected emotion. Moodify provides two interfaces: one with a **UI (Web Interface)** for webcam and real-time video interaction, and one with a **Command-Line Interface (CLI)** for text-based analysis and emotion recognition.
 
 ## **Table of Contents**
 1. [Overview](#overview)
@@ -15,7 +15,6 @@ Moodify is an AI-powered platform that recognizes emotions from video or text in
 6. [Usage](#usage)
     - [UI Version](#usage-ui-version)
     - [CLI Version](#usage-cli-version)
-
 
 ---
 
@@ -131,3 +130,27 @@ $ python cmdcombined.py
 Enter text to analyze: I'm feeling a bit down today.
 Detected Emotion: Sadness
 AI Response: It's okay to feel sad. Take a deep breath and give yourself some time.
+```
+## **Usage**
+
+### **UI Version (Web Interface)**
+
+1. Start Webcam:
+- Click "Start Webcam" to begin emotion detection.
+- The system will capture your face and analyze your emotions in real-time.
+2. AI Response:
+- The detected emotion will be displayed.
+- The system will generate a corresponding response based on the emotion detected.
+3. Stop Webcam:
+- Click "Stop Webcam" to stop the video feed.
+- The text area will be cleared, and the webcam will stop streaming.
+- 
+### **CLI Version**
+
+1. Text Input:
+- Run the script in the terminal.
+- Enter any text to get an emotion analysis and an AI response based on the detected emotion.
+2. AI Response:
+- The system will display the detected emotion and generate a relevant response based on the 
+   input text.
+
