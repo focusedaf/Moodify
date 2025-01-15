@@ -6,7 +6,6 @@ import queue
 
 app = Flask(__name__)
 
-# initialize global variables
 webcam_thread_started = False
 video_capture = None
 feed_lock = threading.Lock()
@@ -57,15 +56,14 @@ def generate_video_feed():
             if not ret:
                 break
             emotion, frame = webcam_emotion_recognition(frame)
+
             if emotion:
                 if emotion not in unique_emotions:
                     if len(unique_emotions) >= MAX_EMOTIONS:
                         unique_emotions.pop(0)
                     unique_emotions.append(emotion)
 
-            # draw bounding box and emotion label on the frame
-            # if emotion:
-            #     cv.putText(frame, emotion, (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv.LINE_AA)
+            
             ret, jpeg = cv.imencode('.jpg', frame)
             if ret:
                 frame = jpeg.tobytes()
@@ -80,12 +78,34 @@ def video_feed():
 def get_emotion_response():
     global unique_emotions
     if unique_emotions:
-        emotion = unique_emotions[-1]
-        ai_response = generate_personalized_response(emotion, "some text")  
+        emotion = unique_emotions[-1] 
+        ai_response = generate_personalized_response(emotion, emotion)  
         return jsonify({"emotion": emotion, "response": ai_response})
-    
-   
     return jsonify({"emotion": "None", "response": "No emotion detected."})
+
+
+
+@app.route('/analyze_image', methods=['POST'])
+def analyze_image():
+    try:
+        image_data = request.form['image']
+        image_data = image_data.split(",")[1]  
+        image = base64.b64decode(image_data)
+        np_img = np.frombuffer(image, np.uint8)
+        frame = cv.imdecode(np_img, cv.IMREAD_COLOR)
+
+    
+        emotion, frame = webcam_emotion_recognition(frame)
+        response = generate_personalized_response(emotion)
+
+        return jsonify({
+            "dominant_emotion": emotion,
+            "response": response
+        })
+    except Exception as e:
+        print(f"Error analyzing image: {e}")
+        return jsonify({"error": "An error occurred during analysis."}), 500
+
 
 
 @app.route('/text')

@@ -10,95 +10,107 @@
     />
   </head>
   <body class="bg-gray-900">
-    <div class="rounded-lg shadow p-6">
-      <h1 class="text-2xl font-bold text-blue-600 mb-4">
+    <div class="container mx-auto mt-8 p-6 text-white">
+      <h1 class="text-3xl font-bold mb-4 text-blue-500 text-center">
         Webcam Emotion Detection
       </h1>
 
-      <video id="webcam" width="100%" height="auto" autoplay></video>
-      <button
-        id="captureBtn"
-        class="px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700 transition duration-200 mt-4"
+      <!-- Unified Section -->
+      <div
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-gray-900 p-4 rounded-lg border border-gray-700"
       >
-        Capture Image
-      </button>
+        <!-- Webcam Video -->
+        <div id="video-container">
+          <img
+            id="processed-video"
+            class="rounded-lg border border-gray-600 w-full"
+            alt="Processed video feed"
+          />
+        </div>
 
-      <canvas id="canvas" style="display: none"></canvas>
+        <!-- AI Response Section -->
+        <div id="response-section ">
+          <h2 class="text-2xl font-semibold mb-2 text-center">AI Response</h2>
+          <textarea
+            id="aiResponse"
+            rows="12"
+            class="w-full bg-gray-800 text-white p-3 rounded-lg border border-gray-700"
+            readonly
+          ></textarea>
+        </div>
+      </div>
 
-      <div id="resultContainer" class="mt-6" style="display: none">
-        <h3 class="text-lg font-semibold mb-2 text-gray-300">
-          Analysis Result
-        </h3>
-        <p>
-          <strong class="text-gray-300">Dominant Emotion:</strong>
-          <span id="dominantEmotion" class="text-blue-600"></span>
-        </p>
-        <p><strong class="text-gray-300">Response:</strong></p>
-        <textarea
-          id="aiResponse"
-          rows="5"
-          class="w-full p-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 mb-4"
-          readonly
-        ></textarea>
+      <!-- Control Buttons -->
+      <div class="flex justify-center mt-6">
+        <button
+          id="startWebcam"
+          class="px-4 py-2 bg-green-500 text-white font-bold rounded-lg mr-2 hover:bg-green-600"
+        >
+          Start Webcam
+        </button>
+        <button
+          id="stopWebcam"
+          class="px-4 py-2 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600"
+        >
+          Stop Webcam
+        </button>
       </div>
     </div>
 
     <script>
+      const processedVideo = document.getElementById("processed-video");
+      const startWebcamBtn = document.getElementById("startWebcam");
+      const stopWebcamBtn = document.getElementById("stopWebcam");
+      const aiResponse = document.getElementById("aiResponse");
 
-              const webcam = document.getElementById('webcam');
-      const canvas = document.getElementById('canvas');
-      const captureBtn = document.getElementById('captureBtn');
-      const resultContainer = document.getElementById('resultContainer');
-      const dominantEmotion = document.getElementById('dominantEmotion');
-      const aiResponse = document.getElementById('aiResponse');
+      let refreshInterval = null;
 
-      // Access webcam
-      navigator.mediaDevices.getUserMedia({ video: true })
-          .then((stream) => {
-              webcam.srcObject = stream;
-          })
-          .catch((err) => {
-              console.error('Error accessing webcam:', err);
-              alert('Could not access webcam. Please check your browser settings.');
+      
+      startWebcamBtn.addEventListener("click", async () => {
+        const response = await fetch("/start_webcam", { method: "POST" });
+        const result = await response.json();
+
+        if (result.status === "Webcam started successfully.") {
+          processedVideo.src = "/video_feed";
+          refreshInterval = setInterval(fetchAIResponse, 5000); 
+        } else {
+          alert(result.status);
+        }
+      });
+
+     
+      stopWebcamBtn.addEventListener("click", async () => {
+        const response = await fetch("/stop_webcam", { method: "POST" });
+        const result = await response.json();
+
+        if (result.status === "Webcam stopped successfully.") {
+          clearInterval(refreshInterval);
+          refreshInterval = null;
+          processedVideo.src = "";
+          aiResponse.value = ""; 
+        } else {
+          alert(result.status);
+        }
+      });
+
+      
+      async function fetchAIResponse() {
+        try {
+          const response = await fetch("/get_emotion_response", {
+            method: "POST",
           });
+          const result = await response.json();
 
-      // Capture and analyze image
-      captureBtn.addEventListener('click', async () => {
-          try {
-              const ctx = canvas.getContext('2d');
-              canvas.width = webcam.videoWidth;
-              canvas.height = webcam.videoHeight;
-              ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
-
-              const imageData = canvas.toDataURL('image/jpeg');
-              const response = await fetch('/analyze_image', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ image: imageData }),
-              });
-
-              const result = await response.json();
-
-              if (response.ok) {
-                  dominantEmotion.textContent = result.dominant_emotion;
-                  aiResponse.value = result.response;
-                  resultContainer.style.display = 'block';
-              } else {
-                  console.error('Error during analysis:', result.error);
-                  alert(Error analyzing image: ${result.error});
-              }
-          } catch (error) {
-              console.error('Unexpected error:', error);
-              alert('An unexpected error occurred. Please try again.');
+          if (result.emotion !== "None") {
+            
+            aiResponse.value = `Emotion Detected: ${result.emotion}\n\nAI's Response: ${result.response}`;
+          } else {
+            aiResponse.value = "No emotion detected.";
           }
-      });
-
-      // Cleanup when leaving the page
-      window.addEventListener('beforeunload', () => {
-          if (webcam.srcObject) {
-              webcam.srcObject.getTracks().forEach((track) => track.stop());
-          }
-      });
+        } catch (error) {
+          console.error("Error fetching AI response:", error);
+        }
+      }
     </script>
   </body>
 </html>
