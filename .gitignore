@@ -1,0 +1,21 @@
+# Ignore Python Virtual Environments
+venv/
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Ignore environment files
+.env
+
+# Ignore backup and images folders
+backup/
+images/
+
+# Ignore node_modules folder
+node_modules/
+
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+*.pyd

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webcam Emotion Detection</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/src/output.css') }}"
+    />
+  </head>
+  <body class="bg-gray-900">
+    <div class="rounded-lg shadow p-6">
+      <h1 class="text-2xl font-bold text-blue-600 mb-4">
+        Webcam Emotion Detection
+      </h1>
+
+      <video id="webcam" width="100%" height="auto" autoplay></video>
+      <button
+        id="captureBtn"
+        class="px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700 transition duration-200 mt-4"
+      >
+        Capture Image
+      </button>
+
+      <canvas id="canvas" style="display: none"></canvas>
+
+      <div id="resultContainer" class="mt-6" style="display: none">
+        <h3 class="text-lg font-semibold mb-2 text-gray-300">
+          Analysis Result
+        </h3>
+        <p>
+          <strong class="text-gray-300">Dominant Emotion:</strong>
+          <span id="dominantEmotion" class="text-blue-600"></span>
+        </p>
+        <p><strong class="text-gray-300">Response:</strong></p>
+        <textarea
+          id="aiResponse"
+          rows="5"
+          class="w-full p-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 mb-4"
+          readonly
+        ></textarea>
+      </div>
+    </div>
+
+    <script>
+
+              const webcam = document.getElementById('webcam');
+      const canvas = document.getElementById('canvas');
+      const captureBtn = document.getElementById('captureBtn');
+      const resultContainer = document.getElementById('resultContainer');
+      const dominantEmotion = document.getElementById('dominantEmotion');
+      const aiResponse = document.getElementById('aiResponse');
+
+      // Access webcam
+      navigator.mediaDevices.getUserMedia({ video: true })
+          .then((stream) => {
+              webcam.srcObject = stream;
+          })
+          .catch((err) => {
+              console.error('Error accessing webcam:', err);
+              alert('Could not access webcam. Please check your browser settings.');
+          });
+
+      // Capture and analyze image
+      captureBtn.addEventListener('click', async () => {
+          try {
+              const ctx = canvas.getContext('2d');
+              canvas.width = webcam.videoWidth;
+              canvas.height = webcam.videoHeight;
+              ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+
+              const imageData = canvas.toDataURL('image/jpeg');
+              const response = await fetch('/analyze_image', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ image: imageData }),
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                  dominantEmotion.textContent = result.dominant_emotion;
+                  aiResponse.value = result.response;
+                  resultContainer.style.display = 'block';
+              } else {
+                  console.error('Error during analysis:', result.error);
+                  alert(Error analyzing image: ${result.error});
+              }
+          } catch (error) {
+              console.error('Unexpected error:', error);
+              alert('An unexpected error occurred. Please try again.');
+          }
+      });
+
+      // Cleanup when leaving the page
+      window.addEventListener('beforeunload', () => {
+          if (webcam.srcObject) {
+              webcam.srcObject.getTracks().forEach((track) => track.stop());
+          }
+      });
+    </script>
+  </body>
+</html>

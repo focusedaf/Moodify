@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Emotion Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/src/output.css') }}" />
+</head>
+<body class="bg-gray-900">
+    <div class="rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-blue-600 mb-4">Text-Based Emotion Detection</h1>
+        <textarea 
+            id="userText" 
+            rows="5" 
+            class="w-full p-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 mb-4" 
+            placeholder="Enter your thoughts here..."></textarea>
+        <button 
+            id="analyzeTextBtn" 
+            class="px-4 py-2 bg-blue-600 text-white font-semibold rounded shadow hover:bg-blue-700 transition duration-200">
+            Analyze
+        </button>
+
+        <div id="resultContainer" class="mt-6" style="display: none;">
+            <h3 class="text-lg font-semibold mb-2 text-gray-300">Analysis Result</h3>
+            <p><strong class="text-gray-300">Dominant Emotion:</strong> <span id="dominantEmotion" class="text-blue-600"></span></p>
+            <p><strong class="text-gray-300">Response:</strong></p>
+            <!-- Display AI response in a textarea -->
+            <textarea 
+                id="aiResponse"
+                rows="5" 
+                class="w-full p-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 mb-4" 
+                readonly></textarea>
+            <h3 class="text-lg font-semibold mb-2 text-gray-300">Emotion Distribution</h3>
+            <img id="emotionChart" class="mt-4" alt="Emotion Distribution Bar Chart" />
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('analyzeTextBtn').addEventListener('click', async () => {
+            const userText = document.getElementById('userText').value.trim();
+            if (!userText) {
+                alert('Please enter some text for analysis.');
+                return;
+            }
+
+            try {
+                
+                const response = await fetch('/analyze_text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: userText }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('dominantEmotion').textContent = result.dominant_emotion;
+                    document.getElementById('aiResponse').value = result.response;
+
+        
+                    const barChartImage = `data:image/png;base64,${result.bar_chart_img}`;
+                    document.getElementById('emotionChart').src = barChartImage;
+
+            
+                    document.getElementById('resultContainer').style.display = 'block';
+                } else {
+                    alert("Error occurred during analysis: " + result.error);
+                }
+
+            } catch (error) {
+                console.error("Error analyzing text:", error);
+                alert("Error occurred during analysis.");
+            }
+        });
+    </script> 
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+<!-- document.getElementById('analyzeTextBtn').addEventListener('click', async () => {
+    const userText = document.getElementById('userText').value.trim();
+    if (!userText) {
+        alert('Please enter some text for analysis.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/analyze_text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: userText }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            // Dynamically update the page with the results
+            document.getElementById('resultContainer').innerHTML = `
+                <h3 class="text-lg font-semibold mb-2 text-gray-300">Analysis Result</h3>
+                <p><strong class="text-gray-300">Dominant Emotion:</strong> <span class="text-blue-600">${result.dominant_emotion}</span></p>
+                <p><strong class="text-gray-300">Response:</strong></p>
+                <textarea rows="5" class="w-full p-4 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 mb-4" readonly>${result.response}</textarea>
+                <h3 class="text-lg font-semibold mb-2 text-gray-300">Emotion Distribution</h3>
+                <img src="data:image/png;base64,${result.bar_chart_img}" alt="Emotion Distribution Bar Chart" class="mt-4" />
+            `;
+        } else {
+            alert("Error occurred during analysis: " + result.error);
+        }
+    } catch (error) {
+        console.error("Error analyzing text:", error);
+        alert("Error occurred during analysis");
+    }
+}); -->
