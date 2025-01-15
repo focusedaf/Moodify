@@ -63,7 +63,6 @@ def generate_video_feed():
                         unique_emotions.pop(0)
                     unique_emotions.append(emotion)
 
-            
             ret, jpeg = cv.imencode('.jpg', frame)
             if ret:
                 frame = jpeg.tobytes()
@@ -83,8 +82,6 @@ def get_emotion_response():
         return jsonify({"emotion": emotion, "response": ai_response})
     return jsonify({"emotion": "None", "response": "No emotion detected."})
 
-
-
 @app.route('/analyze_image', methods=['POST'])
 def analyze_image():
     try:
@@ -94,7 +91,6 @@ def analyze_image():
         np_img = np.frombuffer(image, np.uint8)
         frame = cv.imdecode(np_img, cv.IMREAD_COLOR)
 
-    
         emotion, frame = webcam_emotion_recognition(frame)
         response = generate_personalized_response(emotion)
 
@@ -105,7 +101,6 @@ def analyze_image():
     except Exception as e:
         print(f"Error analyzing image: {e}")
         return jsonify({"error": "An error occurred during analysis."}), 500
-
 
 
 @app.route('/text')

@@ -15,11 +15,9 @@
         Webcam Emotion Detection
       </h1>
 
-      <!-- Unified Section -->
       <div
         class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-gray-900 p-4 rounded-lg border border-gray-700"
       >
-        <!-- Webcam Video -->
         <div id="video-container">
           <img
             id="processed-video"
@@ -28,8 +26,7 @@
           />
         </div>
 
-        <!-- AI Response Section -->
-        <div id="response-section ">
+        <div id="response-section">
           <h2 class="text-2xl font-semibold mb-2 text-center">AI Response</h2>
           <textarea
             id="aiResponse"
@@ -40,7 +37,6 @@
         </div>
       </div>
 
-      <!-- Control Buttons -->
       <div class="flex justify-center mt-6">
         <button
           id="startWebcam"
@@ -65,20 +61,18 @@
 
       let refreshInterval = null;
 
-      
       startWebcamBtn.addEventListener("click", async () => {
         const response = await fetch("/start_webcam", { method: "POST" });
         const result = await response.json();
 
         if (result.status === "Webcam started successfully.") {
           processedVideo.src = "/video_feed";
-          refreshInterval = setInterval(fetchAIResponse, 5000); 
+          refreshInterval = setInterval(fetchAIResponse, 5000);
         } else {
           alert(result.status);
         }
       });
 
-     
       stopWebcamBtn.addEventListener("click", async () => {
         const response = await fetch("/stop_webcam", { method: "POST" });
         const result = await response.json();
@@ -87,13 +81,12 @@
           clearInterval(refreshInterval);
           refreshInterval = null;
           processedVideo.src = "";
-          aiResponse.value = ""; 
+          aiResponse.value = " "; 
         } else {
           alert(result.status);
         }
       });
 
-      
       async function fetchAIResponse() {
         try {
           const response = await fetch("/get_emotion_response", {
@@ -102,7 +95,6 @@
           const result = await response.json();
 
           if (result.emotion !== "None") {
-            
             aiResponse.value = `Emotion Detected: ${result.emotion}\n\nAI's Response: ${result.response}`;
           } else {
             aiResponse.value = "No emotion detected.";
